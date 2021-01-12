@@ -1,3 +1,3 @@
 PyExecJS
-lxml
+lxml==4.2.6
 requests
