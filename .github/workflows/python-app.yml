@@ -5,7 +5,7 @@ name: Punch-in Automation
 
 on:
   schedule:
-    - cron: '25 16 * * *'
+    - cron: '45 16 * * *'
 
 jobs:
   build:
