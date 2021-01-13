@@ -68,20 +68,15 @@ class Report:
 		data['NEED_CHECKIN_DATE'] = time.strftime("%Y-%m-%d", time.localtime())
 		data['DZ_JSDTCJTW'] = 36.3
 		return self.session.post(punchin_url, headers=headers, data=data)
-
-	def get(self, url):
 		
-		return self.session.get(url)
-		
-	def post(self, url):
-		return self.session.post(url)
 		
 if __name__ == "__main__":
-	
 	report = Report()
+	print("Login html")
 	print(report.login(sys.argv[1], sys.argv[2]).text)
 	
 	s = report.punchin()
+	print("Login html")
 	print(s.text)
 	
 	
