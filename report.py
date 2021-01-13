@@ -5,7 +5,6 @@ import sys
 import json
 import time
 
-formdata={}
 class Report:
 
 	def __init__(self):
@@ -82,7 +81,7 @@ if __name__ == "__main__":
 	report = Report()
 	print(report.login(sys.argv[1], sys.argv[2]).text)
 	
-	# s = report.punchin()
+	s = report.punchin()
 	print(s.text)
 	
 	
