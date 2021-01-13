@@ -76,7 +76,7 @@ if __name__ == "__main__":
 	print(report.login(sys.argv[1], sys.argv[2]).text)
 	
 	s = report.punchin()
-	print("Login html")
+	print("Punchin html")
 	print(s.text)
 	
 	
