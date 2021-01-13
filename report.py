@@ -3,7 +3,8 @@ from lxml import etree
 import execjs
 import sys
 import json
-import time
+import datetime
+import pytz
 
 class Report:
 
@@ -64,8 +65,9 @@ class Report:
 		headers = self.create_header()
 		info_response = self.get_info(headers)
 		data = eval(info_response.text.replace("null", "None"))['datas']['getMyDailyReportDatas']['rows'][0]
-		data['CREATED_AT'] = time.strftime("%Y-%m-%d %H:%M", time.localtime())
-		data['NEED_CHECKIN_DATE'] = time.strftime("%Y-%m-%d", time.localtime())
+		data['CREATED_AT'] = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d %H:%M")
+		data['NEED_CHECKIN_DATE'] = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d %H:%M")
+		data['DZ_DBRQ'] = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d")
 		data['DZ_JSDTCJTW'] = 36.3
 		return self.session.post(punchin_url, headers=headers, data=data)
 		
