@@ -1,10 +1,8 @@
+import sys
 import requests
 from lxml import etree
 import execjs
-import sys
-import json
-import datetime
-import pytz
+import load_data
 
 class Report:
 
@@ -49,7 +47,7 @@ class Report:
 		
 		info_response = self.session.post(personal_info_url, data={'rysflb': 'BKS', 'pageSize': '1', 'pageNumber': '1'}, headers=headers)
 		return info_response
-		
+	
 	def login(self, stuid, password):
 		login_url = 'https://newids.seu.edu.cn/authserver/login'
 	
@@ -60,25 +58,27 @@ class Report:
 		s.post(login_url, data=formdata, allow_redirects=False)
 		return s.post(login_url, data=formdata)
 		
-	def punchin(self):
+	def punchin(self, formdata):
 		punchin_url = 'http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/modules/dailyReport/T_REPORT_EPIDEMIC_CHECKIN_SAVE.do'
+		
 		headers = self.create_header()
 		info_response = self.get_info(headers)
-		data = eval(info_response.text.replace("null", "None"))['datas']['getMyDailyReportDatas']['rows'][0]
-		data['CREATED_AT'] = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d %H:%M")
-		data['NEED_CHECKIN_DATE'] = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d %H:%M")
-		data['DZ_DBRQ'] = datetime.datetime.now(pytz.timezone('Asia/Shanghai')).strftime("%Y-%m-%d")
-		data['DZ_JSDTCJTW'] = 36.3
-		return self.session.post(punchin_url, headers=headers, data=data)
+	
+		return self.session.post(punchin_url, data=formdata)
 		
-		
+	def get_session(self):
+		return self.session
+
+	
 if __name__ == "__main__":
 	report = Report()
-	print("Login html")
-	print(report.login(sys.argv[1], sys.argv[2]).text)
 	
-	s = report.punchin()
+	login_response = report.login(sys.argv[1], sys.argv[2])
+	assert "退出" in login_response.text, "Invalid password or studentID"
+	print("Login success")
+	
+	punchin_response = report.punchin(load_data.load_formdata(sys.argv[3]))
 	print("Punchin html")
-	print(s.text)
+	print(punchin_response.text)
 	
 	
