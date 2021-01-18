@@ -36,17 +36,22 @@ class Report:
 	def create_header(self):
 		cookie_url = 'http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/configSet/noraml/getRouteConfig.do'
 		cookie = self.session.get(cookie_url)
-		header = {
-			  'Referer': 'http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/index.do',
-              'Cookie': '_WEU=' + requests.utils.dict_from_cookiejar(cookie.cookies)['_WEU'] + '; MOD_AUTH_CAS=' + requests.utils.dict_from_cookiejar(self.session.cookies)['MOD_AUTH_CAS'] + ';'
-			  }
-		return header
+
 
 	def get_info(self, headers):
 		personal_info_url = 'http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/modules/dailyReport/getMyDailyReportDatas.do'
 
 		info_response = self.session.post(personal_info_url, data={'rysflb': 'BKS', 'pageSize': '1', 'pageNumber': '1'}, headers=headers)
 		return info_response
+
+	def create_formdata(self, json_filename):
+		userinfo_url = 'http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/api/base/getUserDetailDB.do'
+
+		formdata = load_data.load_formdata(json_filename)
+		userinfo = self.session.get(userinfo_url).json()['data']
+		formdata['USER_NAME'] = userinfo['USER_NAME']
+		formdata['DEPT_NAME'] = userinfo['DEPT_NAME']
+		return formdata
 
 	def login(self, stuid, password):
 		login_url = 'https://newids.seu.edu.cn/authserver/login'
@@ -59,13 +64,12 @@ class Report:
 		s.post(login_url, data=formdata, allow_redirects=False)
 		return s.post(login_url, data=formdata)
 
-	def punchin(self, formdata):
+	def punchin(self, json_filename):
 		punchin_url = 'http://ehall.seu.edu.cn/qljfwapp2/sys/lwReportEpidemicSeu/modules/dailyReport/T_REPORT_EPIDEMIC_CHECKIN_SAVE.do'
 
-		headers = self.create_header()
+		self.create_header()
 		# info_response = self.get_info(headers)
-
-		return self.session.post(punchin_url, data=formdata)
+		return self.session.post(punchin_url, data=self.create_formdata(json_filename))
 
 	def get_session(self):
 		return self.session
@@ -80,16 +84,23 @@ if __name__ == "__main__":
 		except requests.exceptions.ConnectionError:
 			continue
 		break
-	assert "退出" in login_response.text, "Invalid password or studentID"
+	try:
+		assert "退出" in login_response.text, "Invalid password or studentID"
+	except NameError:
+		print("ConnectionError")
+
 	print("Login success")
+	print("==============================")
 
 	while retry_counter > 0:
 		try:
-			punchin_response = report.punchin(load_data.load_formdata(sys.argv[3]))
+			punchin_response = report.punchin(sys.argv[3])
 		except requests.exceptions.ConnectionError:
 			continue
 		break
-	print("Punchin html")
-	print(punchin_response.text)
+	try:
+		print(punchin_response.text)
+	except NameError:
+		print("ConnectionError")
 
 
