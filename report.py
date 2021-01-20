@@ -3,6 +3,8 @@ import requests
 from lxml import etree
 import execjs
 import load_data
+from requests.exceptions import ConnectionError
+
 
 class Report:
 
@@ -81,26 +83,27 @@ if __name__ == "__main__":
 	while retry_counter > 0:
 		try:
 			login_response = report.login(sys.argv[1], sys.argv[2])
-		except requests.exceptions.ConnectionError:
+		except ConnectionError:
 			continue
 		break
 	try:
 		assert "退出" in login_response.text, "Invalid password or studentID"
 	except NameError:
-		print("ConnectionError")
+		raise ConnectionError('Retry 5 times but still fail to log-in.')
 
 	print("Login success")
 	print("==============================")
 
+	retry_counter = 5
 	while retry_counter > 0:
 		try:
 			punchin_response = report.punchin(sys.argv[3])
-		except requests.exceptions.ConnectionError:
+		except ConnectionError:
 			continue
 		break
 	try:
 		print(punchin_response.text)
 	except NameError:
-		print("ConnectionError")
+		raise ConnectionError('Retry 5 times but still fail to punch-in.')
 
 
