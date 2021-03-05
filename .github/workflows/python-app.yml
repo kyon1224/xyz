@@ -4,9 +4,9 @@
 name: Punch-in Automation
 
 on:
-  #push:
-    #branches:
-     # - master
+  push:
+    branches:
+      - master
   schedule:
     - cron: '35 16 * * *'
 
